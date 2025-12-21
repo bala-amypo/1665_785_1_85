@@ -1,10 +1,38 @@
+// package com.example.demo.service;
+
+// import com.example.demo.entity.User;
+
+// public interface UserService {
+
+//     User register(User user);
+
+//     User findByEmail(String email);
+// }
 package com.example.demo.service;
 
 import com.example.demo.entity.User;
+import com.example.demo.repository.UserRepository;
+import org.springframework.stereotype.Service;
 
-public interface UserService {
+@Service
+public class UserService {
 
-    User register(User user);
+    private final UserRepository userRepository;
 
-    User findByEmail(String email);
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public User register(User user) {
+        return userRepository.save(user);
+    }
+
+    public User login(String email, String password) {
+        User user = userRepository.findByEmail(email);
+
+        if (user != null && user.getPassword().equals(password)) {
+            return user;
+        }
+        return null;
+    }
 }
