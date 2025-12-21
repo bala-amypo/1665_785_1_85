@@ -26,8 +26,12 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
 public class User {
 
     @Id
@@ -37,6 +41,4 @@ public class User {
     private String name;
     private String email;
     private String password;
-
-    // Getters and Setters
 }
