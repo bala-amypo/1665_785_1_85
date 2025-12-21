@@ -1,12 +1,13 @@
 package com.example.demo.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class RatingLog {
 
     @Id
@@ -17,17 +18,10 @@ public class RatingLog {
     private Property property;
 
     private String message;
+    private LocalDateTime loggedAt;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public Property getProperty() { return property; }
-    public void setProperty(Property property) {
-        this.property = property;
-    }
-
-    public String getMessage() { return message; }
-    public void setMessage(String message) {
-        this.message = message;
+    @PrePersist
+    public void onCreate() {
+        loggedAt = LocalDateTime.now();
     }
 }

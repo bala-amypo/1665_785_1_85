@@ -1,12 +1,13 @@
 package com.example.demo.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class RatingResult {
 
     @Id
@@ -18,22 +19,10 @@ public class RatingResult {
 
     private Double finalRating;
     private String ratingCategory;
+    private LocalDateTime ratedAt;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public Property getProperty() { return property; }
-    public void setProperty(Property property) {
-        this.property = property;
-    }
-
-    public Double getFinalRating() { return finalRating; }
-    public void setFinalRating(Double finalRating) {
-        this.finalRating = finalRating;
-    }
-
-    public String getRatingCategory() { return ratingCategory; }
-    public void setRatingCategory(String ratingCategory) {
-        this.ratingCategory = ratingCategory;
+    @PrePersist
+    public void onCreate() {
+        ratedAt = LocalDateTime.now();
     }
 }
