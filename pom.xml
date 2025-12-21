@@ -67,12 +67,6 @@
     <artifactId>spring-boot-starter-validation</artifactId>
     <version>3.5.6</version>
 </dependency>
-	<dependency>
-    	<groupId>org.projectlombok</groupId>
-    	<artifactId>lombok</artifactId>
-    	<version>1.18.30</version>
-    	<scope>provided</scope>
-	</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.mysql/mysql-connector-j -->
 	<dependency>
@@ -85,6 +79,14 @@
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-security</artifactId>
 </dependency>
+
+<dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+    <version>1.18.30</version>
+    <scope>provided</scope>
+</dependency>
+
 
 
 
