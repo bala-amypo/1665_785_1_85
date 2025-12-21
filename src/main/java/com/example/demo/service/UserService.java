@@ -11,28 +11,12 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.User;
-import com.example.demo.repository.UserRepository;
-import org.springframework.stereotype.Service;
 
-@Service
-public class UserService {
+public interface UserService {
 
-    private final UserRepository userRepository;
+    User register(User user);
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    User login(String email, String password);
 
-    public User register(User user) {
-        return userRepository.save(user);
-    }
-
-    public User login(String email, String password) {
-        User user = userRepository.findByEmail(email);
-
-        if (user != null && user.getPassword().equals(password)) {
-            return user;
-        }
-        return null;
-    }
+    User getUserById(Long id);
 }
