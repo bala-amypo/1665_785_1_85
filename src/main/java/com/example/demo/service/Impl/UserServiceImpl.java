@@ -14,13 +14,11 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
     }
 
-    // REGISTER USER
     @Override
     public User register(User user) {
-        return userRepository.save(user);
+return userRepository.save(user);
     }
 
-    // LOGIN USER (NO JWT, NO SECURITY)
     @Override
     public User login(String email, String password) {
         User user = userRepository.findByEmail(email);
@@ -31,7 +29,6 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
-    // GET USER BY ID (CRUD)
     @Override
     public User getUserById(Long id) {
         return userRepository.findById(id).orElse(null);

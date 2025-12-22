@@ -16,11 +16,8 @@ public class RatingServiceImpl implements RatingService {
     private final PropertyRepository propertyRepository;
     private final RatingLogService ratingLogService;
 
-    public RatingServiceImpl(FacilityScoreRepository scoreRepository,
-                             RatingResultRepository resultRepository,
-                             PropertyRepository propertyRepository,
-                             RatingLogService ratingLogService) {
-        this.scoreRepository = scoreRepository;
+    public RatingServiceImpl(FacilityScoreRepository scoreRepository,RatingResultRepository resultRepository, PropertyRepository propertyRepository,RatingLogService ratingLogService) {
+    this.scoreRepository = scoreRepository;
         this.resultRepository = resultRepository;
         this.propertyRepository = propertyRepository;
         this.ratingLogService = ratingLogService;
@@ -30,10 +27,7 @@ public class RatingServiceImpl implements RatingService {
     public RatingResult generateRating(Long propertyId) {
         FacilityScore score = scoreRepository.findByPropertyId(propertyId);
 
-        double avg = (score.getSchoolProximity()
-                + score.getHospitalProximity()
-                + score.getTransportAccess()
-                + score.getSafetyScore()) / 4.0;
+        double avg = (score.getSchoolProximity() + score.getHospitalProximity()+ score.getTransportAccess()+ score.getSafetyScore()) / 4.0;
 
         String category =
                 avg < 4 ? "POOR" :
