@@ -29,8 +29,7 @@ public class RatingServiceImpl implements RatingService {
 
         double avg = (score.getSchoolProximity() + score.getHospitalProximity()+ score.getTransportAccess()+ score.getSafetyScore()) / 4.0;
 
-        String category =
-                avg < 4 ? "POOR" :
+        String category =avg < 4 ? "POOR" :
                 avg < 6 ? "AVERAGE" :
                 avg < 8 ? "GOOD" : "EXCELLENT";
 
