@@ -8,11 +8,12 @@
 
 //     FacilityScore getScoreByProperty(Long propertyId);
 // }
+
 package com.example.demo.service;
 
 import com.example.demo.entity.FacilityScore;
 
 public interface FacilityScoreService {
-    FacilityScore addScore(Long propertyId, FacilityScore score);
-    FacilityScore getScoreByProperty(Long propertyId);
+    FacilityScore saveScore(Long propertyId, FacilityScore score);
+    FacilityScore getScoreByProperty(Long propertyId); // This was missing
 }
