@@ -10,12 +10,16 @@ import java.util.Map;
 
 @Component
 public class JwtTokenProvider {
-    private final String SECRET = "RealEstateSecretKey"; // Must be consistent
+    // Requirement: Constant secret key for validation consistency
+    private final String SECRET = "RealEstateSecretKeyForJWTAuthentication1234567890";
 
+    /**
+     * Requirement: Payload must include userId, email, and role.
+     * Fixed signature to match Portal Integration Tests.
+     */
     public String generateToken(Long userId, String email, String role) {
         Map<String, Object> claims = new HashMap<>();
-        // Requirement: Exact keys userId, email, role
-        claims.put("userId", userId); 
+        claims.put("userId", userId);
         claims.put("email", email);
         claims.put("role", role);
 
@@ -23,13 +27,17 @@ public class JwtTokenProvider {
                 .setClaims(claims)
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 24 hours
                 .signWith(SignatureAlgorithm.HS512, SECRET)
                 .compact();
     }
 
     public String getEmailFromToken(String token) {
-        return Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parser()
+                .setSigningKey(SECRET)
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
     public boolean validateToken(String token) {
