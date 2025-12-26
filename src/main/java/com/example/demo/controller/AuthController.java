@@ -42,6 +42,7 @@
 //         return "Login successful";
 //     }
 // }
+
 package com.example.demo.controller;
 
 import com.example.demo.dto.AuthResponse;
@@ -53,47 +54,65 @@ import com.example.demo.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
-@Tag(name = "AuthController", description = "Authentication and Registration Management")
+@RequestMapping("/api/auth")
+@Tag(name = "Auth Controller", description = "Endpoints for user registration and authentication")
 public class AuthController {
 
+    private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final JwtTokenProvider tokenProvider;
 
     // Requirement: Constructor Injection
-    public AuthController(UserService userService, JwtTokenProvider tokenProvider) {
+    public AuthController(AuthenticationManager authenticationManager, 
+                          UserService userService, 
+                          JwtTokenProvider tokenProvider) {
+        this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.tokenProvider = tokenProvider;
     }
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user")
-    public ResponseEntity<User> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest registerRequest) {
         User user = new User();
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
-        if (request.getRole() != null) {
-            user.setRole(request.getRole());
-        }
-        return ResponseEntity.ok(userService.register(user));
+        user.setName(registerRequest.getName());
+        user.setEmail(registerRequest.getEmail());
+        user.setPassword(registerRequest.getPassword());
+        user.setRole(registerRequest.getRole());
+
+        User registeredUser = userService.register(user);
+        return ResponseEntity.ok("User registered successfully");
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login and get JWT token")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
-        User user = userService.findByEmail(request.getEmail());
-        
-        // Requirement: Payload must include userId, email, and role
-        String token = tokenProvider.generateToken(
-                user.getId(), 
-                user.getEmail(), 
-                user.getRole()
+    @Operation(summary = "Authenticate user and return JWT token")
+    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
+        // Step 1: Perform standard authentication
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getEmail(),
+                        loginRequest.getPassword()
+                )
         );
-        
-        return ResponseEntity.ok(new AuthResponse(token));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // Step 2: Fix for "Optional cannot be converted to User"
+        // We unwrap the Optional here to get the raw User entity
+        User user = userService.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + loginRequest.getEmail()));
+
+        // Step 3: Generate Token using the (Long, String, String) signature
+        String jwt = tokenProvider.generateToken(user.getId(), user.getEmail(), user.getRole());
+
+        // Step 4: Return consistent response structure for tests
+        return ResponseEntity.ok(new AuthResponse(jwt, user.getEmail(), user.getRole()));
     }
 }
