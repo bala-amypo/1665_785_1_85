@@ -1,13 +1,39 @@
+// package com.example.demo.entity;
+
+// import jakarta.persistence.*;
+// import lombok.*;
+// import java.time.LocalDateTime;
+
+// @Entity
+// @Data
+// @NoArgsConstructor
+// @AllArgsConstructor
+// public class RatingLog {
+
+//     @Id
+//     @GeneratedValue(strategy = GenerationType.IDENTITY)
+//     private Long id;
+
+//     @ManyToOne
+//     private Property property;
+
+//     private String message;
+//     private LocalDateTime loggedAt;
+
+//     @PrePersist
+//     public void onCreate() {
+//         loggedAt = LocalDateTime.now();
+//     }
+// }
+
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class RatingLog {
 
     @Id
@@ -15,13 +41,15 @@ public class RatingLog {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "property_id", nullable = false)
     private Property property;
 
     private String message;
+
     private LocalDateTime loggedAt;
 
     @PrePersist
-    public void onCreate() {
-        loggedAt = LocalDateTime.now();
+    protected void onCreate() {
+        this.loggedAt = LocalDateTime.now();
     }
 }
