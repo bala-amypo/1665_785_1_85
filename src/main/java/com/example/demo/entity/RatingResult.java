@@ -25,6 +25,7 @@
 //         ratedAt = LocalDateTime.now();
 //     }
 // }
+
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
@@ -34,23 +35,21 @@ import java.time.LocalDateTime;
 @Entity
 @Data
 public class RatingResult {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "property_id", nullable = false)
-    private Property property;
+    @JoinColumn(name = "property_id")
+    private Property property; //
 
     private Double finalRating;
-
-    private String ratingCategory;
+    private String ratingCategory; // POOR, AVERAGE, GOOD, EXCELLENT
 
     private LocalDateTime ratedAt;
 
     @PrePersist
     protected void onCreate() {
-        this.ratedAt = LocalDateTime.now();
+        this.ratedAt = LocalDateTime.now(); // Auto-generated
     }
 }
