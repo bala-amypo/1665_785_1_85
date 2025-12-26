@@ -44,9 +44,12 @@
 // }
 package com.example.demo.controller;
 
+import com.example.demo.dto.AuthResponse;
+import com.example.demo.dto.LoginRequest;
+import com.example.demo.dto.RegisterRequest;
 import com.example.demo.entity.User;
-import com.example.demo.service.UserService;
 import com.example.demo.security.JwtTokenProvider;
+import com.example.demo.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -54,45 +57,43 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
-@Tag(name = "Auth Controller", description = "Endpoints for user registration and authentication")
+@Tag(name = "AuthController", description = "Authentication and Registration Management")
 public class AuthController {
 
     private final UserService userService;
     private final JwtTokenProvider tokenProvider;
 
-    /**
-     * Requirement: Must use Constructor Injection.
-     * The automated test suite manually instantiates this controller.
-     */
+    // Requirement: Constructor Injection
     public AuthController(UserService userService, JwtTokenProvider tokenProvider) {
         this.userService = userService;
         this.tokenProvider = tokenProvider;
     }
 
     @PostMapping("/register")
-    @Operation(summary = "Register a new user", description = "Creates a new user with default role ANALYST")
-    public ResponseEntity<User> register(@RequestBody User user) {
+    @Operation(summary = "Register a new user")
+    public ResponseEntity<User> register(@RequestBody RegisterRequest request) {
+        User user = new User();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setPassword(request.getPassword());
+        if (request.getRole() != null) {
+            user.setRole(request.getRole());
+        }
         return ResponseEntity.ok(userService.register(user));
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login and receive JWT", description = "Authenticates user and returns a token containing userId, email, and role")
-    public ResponseEntity<String> login(@RequestBody User loginRequest) {
-        // 1. Fetch the user from the database to get metadata (ID and Role)
-        // This uses the findByEmail method you implemented in UserServiceImpl
-        User user = userService.findByEmail(loginRequest.getEmail());
-
-        /**
-         * 2. Generate the token with the 3 required fields.
-         * Match the signature in JwtTokenProvider: 
-         * generateToken(Long userId, String email, String role)
-         */
+    @Operation(summary = "Login and get JWT token")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+        User user = userService.findByEmail(request.getEmail());
+        
+        // Requirement: Payload must include userId, email, and role
         String token = tokenProvider.generateToken(
                 user.getId(), 
                 user.getEmail(), 
                 user.getRole()
         );
-
-        return ResponseEntity.ok(token);
+        
+        return ResponseEntity.ok(new AuthResponse(token));
     }
 }

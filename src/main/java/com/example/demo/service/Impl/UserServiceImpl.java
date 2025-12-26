@@ -32,13 +32,15 @@
 //         return userRepository.findById(id).orElse(null);
 //     }
 // }
-
-package com.example.demo.service;
+package com.example.demo.service.Impl;
 
 import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.service.UserService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -54,11 +56,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User register(User user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            // Requirement: Message must contain "Email already in use"
-            throw new RuntimeException("Validation failed: Email already in use");
+        Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
+        if (existingUser.isPresent()) {
+            // Requirement: Error message must contain "Email already in use"
+            throw new RuntimeException("Email already in use");
         }
+
+        // Requirement: Default role = ANALYST
+        if (user.getRole() == null || user.getRole().isEmpty()) {
+            user.setRole("ANALYST");
+        }
+
+        // Requirement: Password hashed using BCrypt
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        
         return userRepository.save(user);
     }
 
