@@ -84,33 +84,33 @@ public class RatingServiceImpl implements RatingService {
         Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new RuntimeException("Property not found"));
 
+        // FIXED: Using .orElseThrow() on the Optional result
         FacilityScore score = facilityScoreRepository.findByPropertyId(propertyId)
                 .orElseThrow(() -> new RuntimeException("Facility score missing"));
 
+        // Requirement calculation
         double finalRating = (score.getSchoolProximity() * 0.3) +
                              (score.getHospitalProximity() * 0.2) +
                              (score.getTransportAccess() * 0.2) +
                              (score.getSafetyScore() * 0.3);
 
-        String category;
-        if (finalRating >= 8) category = "EXCELLENT";
-        else if (finalRating >= 6) category = "GOOD";
-        else if (finalRating >= 4) category = "AVERAGE";
-        else category = "POOR";
+        String category = (finalRating >= 8) ? "EXCELLENT" : 
+                          (finalRating >= 6) ? "GOOD" : 
+                          (finalRating >= 4) ? "AVERAGE" : "POOR";
 
         RatingResult result = new RatingResult();
         result.setProperty(property);
         result.setFinalRating(finalRating);
         result.setRatingCategory(category);
         
-        RatingResult savedResult = ratingResultRepository.save(result);
+        RatingResult saved = ratingResultRepository.save(result);
 
         RatingLog log = new RatingLog();
         log.setProperty(property);
         log.setMessage("Rating generated: " + category);
         ratingLogRepository.save(log);
 
-        return savedResult;
+        return saved;
     }
 
     @Override
@@ -120,7 +120,6 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public RatingResult getRatingByProperty(Long propertyId) {
-        // This line caused your previous error because findByPropertyId wasn't returning Optional
         return ratingResultRepository.findByPropertyId(propertyId)
                 .orElseThrow(() -> new RuntimeException("Rating result not found"));
     }

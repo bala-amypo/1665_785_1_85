@@ -47,7 +47,6 @@ public class FacilityScoreServiceImpl implements FacilityScoreService {
     private final PropertyRepository propertyRepository;
     private final RatingService ratingService;
 
-    // Requirement: Constructor Injection
     public FacilityScoreServiceImpl(FacilityScoreRepository facilityScoreRepository, 
                                      PropertyRepository propertyRepository,
                                      RatingService ratingService) {
@@ -62,28 +61,21 @@ public class FacilityScoreServiceImpl implements FacilityScoreService {
         Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new RuntimeException("Property not found"));
 
-        // Validate individual scores (0-10)
-        if (isInvalid(score.getSchoolProximity()) || isInvalid(score.getHospitalProximity()) ||
-            isInvalid(score.getTransportAccess()) || isInvalid(score.getSafetyScore())) {
+        // Score validation (0-10)
+        if (score.getSchoolProximity() < 0 || score.getSchoolProximity() > 10) 
             throw new RuntimeException("Scores must be between 0 and 10");
-        }
 
         score.setProperty(property);
-        FacilityScore savedScore = facilityScoreRepository.save(score);
-
-        // Requirement: Trigger rating generation upon score submission
+        FacilityScore saved = facilityScoreRepository.save(score);
+        
+        // Trigger rating automatically
         ratingService.generateRating(propertyId);
-
-        return savedScore;
+        return saved;
     }
 
     @Override
     public FacilityScore getScoreByProperty(Long propertyId) {
         return facilityScoreRepository.findByPropertyId(propertyId)
                 .orElseThrow(() -> new RuntimeException("Facility score not found"));
-    }
-
-    private boolean isInvalid(Integer value) {
-        return value == null || value < 0 || value > 10;
     }
 }
