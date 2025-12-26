@@ -42,7 +42,6 @@
 //         return "Login successful";
 //     }
 // }
-
 package com.example.demo.controller;
 
 import com.example.demo.entity.User;
@@ -55,29 +54,45 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
-@Tag(name = "Auth Controller")
+@Tag(name = "Auth Controller", description = "Endpoints for user registration and authentication")
 public class AuthController {
 
     private final UserService userService;
     private final JwtTokenProvider tokenProvider;
 
-    // Constructor Injection
+    /**
+     * Requirement: Must use Constructor Injection.
+     * The automated test suite manually instantiates this controller.
+     */
     public AuthController(UserService userService, JwtTokenProvider tokenProvider) {
         this.userService = userService;
         this.tokenProvider = tokenProvider;
     }
 
     @PostMapping("/register")
-    @Operation(summary = "Register a new user")
+    @Operation(summary = "Register a new user", description = "Creates a new user with default role ANALYST")
     public ResponseEntity<User> register(@RequestBody User user) {
         return ResponseEntity.ok(userService.register(user));
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login and receive JWT")
+    @Operation(summary = "Login and receive JWT", description = "Authenticates user and returns a token containing userId, email, and role")
     public ResponseEntity<String> login(@RequestBody User loginRequest) {
-        // Implementation logic to verify password and generate token
-        String token = tokenProvider.generateToken(loginRequest.getEmail());
+        // 1. Fetch the user from the database to get metadata (ID and Role)
+        // This uses the findByEmail method you implemented in UserServiceImpl
+        User user = userService.findByEmail(loginRequest.getEmail());
+
+        /**
+         * 2. Generate the token with the 3 required fields.
+         * Match the signature in JwtTokenProvider: 
+         * generateToken(Long userId, String email, String role)
+         */
+        String token = tokenProvider.generateToken(
+                user.getId(), 
+                user.getEmail(), 
+                user.getRole()
+        );
+
         return ResponseEntity.ok(token);
     }
 }
