@@ -32,6 +32,7 @@
 //     @Max(10)
 //     private Integer safetyScore;
 // }
+
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
@@ -52,10 +53,13 @@ public class FacilityScore {
 
     @Min(0) @Max(10)
     private Integer schoolProximity;
+
     @Min(0) @Max(10)
     private Integer hospitalProximity;
+
     @Min(0) @Max(10)
     private Integer transportAccess;
+
     @Min(0) @Max(10)
     private Integer safetyScore;
 }
