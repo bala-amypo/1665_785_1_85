@@ -8,12 +8,12 @@
 
 //     FacilityScore getScoreByProperty(Long propertyId);
 // }
-
 package com.example.demo.service;
 
 import com.example.demo.entity.FacilityScore;
 
 public interface FacilityScoreService {
-    FacilityScore saveScore(Long propertyId, FacilityScore score);
-    FacilityScore getScoreByProperty(Long propertyId); // This was missing
+    // Rename from saveScore to addScore to match the Controller call
+    FacilityScore addScore(Long propertyId, FacilityScore score);
+    FacilityScore getScoreByProperty(Long propertyId);
 }
