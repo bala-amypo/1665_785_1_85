@@ -10,11 +10,12 @@ import java.util.Map;
 
 @Component
 public class JwtTokenProvider {
-    private final String SECRET = "RealEstateSecretKey"; // Use a stronger key in production
+    private final String SECRET = "RealEstateSecretKey"; // Must be consistent
 
     public String generateToken(Long userId, String email, String role) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userId);
+        // Requirement: Exact keys userId, email, role
+        claims.put("userId", userId); 
         claims.put("email", email);
         claims.put("role", role);
 
@@ -22,7 +23,7 @@ public class JwtTokenProvider {
                 .setClaims(claims)
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 24 hours
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(SignatureAlgorithm.HS512, SECRET)
                 .compact();
     }
