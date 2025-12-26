@@ -29,13 +29,12 @@
 //     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL)
 //     private List<RatingLog> ratingLogs;
 // }
+
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import lombok.Data;
-import java.util.List;
 
 @Entity
 @Data
@@ -43,17 +42,16 @@ public class Property {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    private String title;
     private String address;
     private String city;
     
-    @DecimalMin(value = "0.01", message = "Price > 0")
+    @Min(value = 1, message = "Price must be greater than 0")
     private Double price;
     
-    @Min(value = 100, message = "Area >= 100")
+    @Min(value = 100, message = "Area must be at least 100 sq ft")
     private Double areaSqFt;
 
-    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RatingLog> ratingLogs;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User owner;
 }
