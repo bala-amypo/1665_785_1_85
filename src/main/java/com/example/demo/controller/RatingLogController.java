@@ -26,35 +26,36 @@
 //         return ratingLogService.getLogsByProperty(propertyId);
 //     }
 // }
-package com.example.demo.controller;
 
-import com.example.demo.entity.RatingLog;
-import com.example.demo.service.RatingLogService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.web.bind.annotation.*;
-import java.util.List;
+// package com.example.demo.controller;
 
-@RestController
-@RequestMapping("/logs")
-@Tag(name = "Rating Log Controller")
-public class RatingLogController {
+// import com.example.demo.entity.RatingLog;
+// import com.example.demo.service.RatingLogService;
+// import io.swagger.v3.oas.annotations.Operation;
+// import io.swagger.v3.oas.annotations.tags.Tag;
+// import org.springframework.web.bind.annotation.*;
+// import java.util.List;
 
-    private final RatingLogService logService;
+// @RestController
+// @RequestMapping("/logs")
+// @Tag(name = "Rating Log Controller")
+// public class RatingLogController {
 
-    public RatingLogController(RatingLogService logService) {
-        this.logService = logService;
-    }
+//     private final RatingLogService logService;
 
-    @PostMapping("/{propertyId}")
-    @Operation(summary = "Add a log entry for a property")
-    public RatingLog addLog(@PathVariable Long propertyId, @RequestBody String message) {
-        return logService.addLog(propertyId, message);
-    }
+//     public RatingLogController(RatingLogService logService) {
+//         this.logService = logService;
+//     }
 
-    @GetMapping("/property/{propertyId}")
-    @Operation(summary = "View logs for a specific property")
-    public List<RatingLog> viewLogs(@PathVariable Long propertyId) {
-        return logService.getLogsByProperty(propertyId);
-    }
-}
+//     @PostMapping("/{propertyId}")
+//     @Operation(summary = "Add a log entry for a property")
+//     public RatingLog addLog(@PathVariable Long propertyId, @RequestBody String message) {
+//         return logService.addLog(propertyId, message);
+//     }
+
+//     @GetMapping("/property/{propertyId}")
+//     @Operation(summary = "View logs for a specific property")
+//     public List<RatingLog> viewLogs(@PathVariable Long propertyId) {
+//         return logService.getLogsByProperty(propertyId);
+//     }
+// }
