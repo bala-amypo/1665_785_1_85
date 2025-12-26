@@ -32,12 +32,13 @@
 //         return userRepository.findById(id).orElse(null);
 //     }
 // }
+
 package com.example.demo.service.Impl;
 
 import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -46,36 +47,33 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     // Requirement: Constructor Injection
-    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public User register(User user) {
-        Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
-        if (existingUser.isPresent()) {
-            // Requirement: Error message must contain "Email already in use"
+        // Requirement: Check for unique email
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new RuntimeException("Email already in use");
         }
 
-        // Requirement: Default role = ANALYST
-        if (user.getRole() == null || user.getRole().isEmpty()) {
+        // Requirement: Default role to ANALYST if null or empty
+        if (user.getRole() == null || user.getRole().trim().isEmpty()) {
             user.setRole("ANALYST");
         }
 
-        // Requirement: Password hashed using BCrypt
+        // BCrypt hashing requirement
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        
         return userRepository.save(user);
     }
 
     @Override
-    public User findByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 }
