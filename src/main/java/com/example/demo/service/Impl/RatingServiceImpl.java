@@ -51,7 +51,6 @@
 // }
 
 
-
 package com.example.demo.service.Impl;
 
 import com.example.demo.entity.*;
@@ -85,38 +84,33 @@ public class RatingServiceImpl implements RatingService {
         Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new RuntimeException("Property not found"));
 
-        // FIX: Unwrap the Optional to resolve compilation error
         FacilityScore score = facilityScoreRepository.findByPropertyId(propertyId)
-                .orElseThrow(() -> new RuntimeException("Facility score missing for property"));
+                .orElseThrow(() -> new RuntimeException("Facility score missing"));
 
-        // Requirement: Weighted calculation (30/20/20/30)
         double finalRating = (score.getSchoolProximity() * 0.3) +
                              (score.getHospitalProximity() * 0.2) +
                              (score.getTransportAccess() * 0.2) +
                              (score.getSafetyScore() * 0.3);
 
-        String category = determineCategory(finalRating);
+        String category;
+        if (finalRating >= 8) category = "EXCELLENT";
+        else if (finalRating >= 6) category = "GOOD";
+        else if (finalRating >= 4) category = "AVERAGE";
+        else category = "POOR";
 
         RatingResult result = new RatingResult();
         result.setProperty(property);
         result.setFinalRating(finalRating);
         result.setRatingCategory(category);
+        
         RatingResult savedResult = ratingResultRepository.save(result);
 
-        // Requirement: Audit log for every generated rating
         RatingLog log = new RatingLog();
         log.setProperty(property);
-        log.setMessage("Rating generated: " + category + " with score " + finalRating);
+        log.setMessage("Rating generated: " + category);
         ratingLogRepository.save(log);
 
         return savedResult;
-    }
-
-    private String determineCategory(double rating) {
-        if (rating >= 8) return "EXCELLENT";
-        if (rating >= 6) return "GOOD";
-        if (rating >= 4) return "AVERAGE";
-        return "POOR";
     }
 
     @Override
@@ -126,7 +120,8 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public RatingResult getRatingByProperty(Long propertyId) {
+        // This line caused your previous error because findByPropertyId wasn't returning Optional
         return ratingResultRepository.findByPropertyId(propertyId)
-                .orElseThrow(() -> new RuntimeException("Rating not found"));
+                .orElseThrow(() -> new RuntimeException("Rating result not found"));
     }
 }
