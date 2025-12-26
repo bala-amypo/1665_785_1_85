@@ -9,14 +9,14 @@
 
 //     User getUserById(Long id);
 // }
+
 package com.example.demo.service;
 
 import com.example.demo.entity.User;
+import java.util.Optional;
 
 public interface UserService {
-    // Used for registration
     User register(User user);
-    
-    // Used for login to fetch user metadata
-    User findByEmail(String email);
+    // FIX: Change return type to Optional<User> to match the implementation
+    Optional<User> findByEmail(String email);
 }
