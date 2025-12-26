@@ -9,3 +9,8 @@ public class RegisterRequest {
     private String password;
     private String role; // Optional, defaults to ANALYST in service
 }
+
+
+
+
+
