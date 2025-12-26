@@ -15,5 +15,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface FacilityScoreRepository extends JpaRepository<FacilityScore, Long> {
+    // This must return Optional to be compatible with the service logic
     Optional<FacilityScore> findByPropertyId(Long propertyId);
 }

@@ -50,13 +50,21 @@
 //     }
 // }
 
-package com.example.demo.service;
+package com.example.demo.service.Impl;
 
-import com.example.demo.entity.*;
+import com.example.demo.entity.FacilityScore;
+import com.example.demo.entity.Property;
+import com.example.demo.entity.RatingResult;
+import com.example.demo.entity.RatingLog;
 import com.example.demo.repository.FacilityScoreRepository;
 import com.example.demo.repository.PropertyRepository;
 import com.example.demo.repository.RatingResultRepository;
+import com.example.demo.repository.RatingLogRepository;
+import com.example.demo.service.RatingService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class RatingServiceImpl implements RatingService {
@@ -64,48 +72,68 @@ public class RatingServiceImpl implements RatingService {
     private final RatingResultRepository ratingResultRepository;
     private final FacilityScoreRepository facilityScoreRepository;
     private final PropertyRepository propertyRepository;
-    private final RatingLogService logService;
+    private final RatingLogRepository ratingLogRepository;
 
-    public RatingServiceImpl(RatingResultRepository rr, FacilityScoreRepository fs, 
-                             PropertyRepository pr, RatingLogService ls) {
-        this.ratingResultRepository = rr;
-        this.facilityScoreRepository = fs;
-        this.propertyRepository = pr;
-        this.logService = ls;
+    // Requirement: Constructor Injection
+    public RatingServiceImpl(
+            RatingResultRepository ratingResultRepository,
+            FacilityScoreRepository facilityScoreRepository,
+            PropertyRepository propertyRepository,
+            RatingLogRepository ratingLogRepository) {
+        this.ratingResultRepository = ratingResultRepository;
+        this.facilityScoreRepository = facilityScoreRepository;
+        this.propertyRepository = propertyRepository;
+        this.ratingLogRepository = ratingLogRepository;
     }
 
     @Override
+    @Transactional
     public RatingResult generateRating(Long propertyId) {
         Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new RuntimeException("Property not found"));
 
-        FacilityScore fs = facilityScoreRepository.findByPropertyId(propertyId);
-        if (fs == null) {
-            throw new RuntimeException("Facility scores not found for this property");
-        }
+        // FIX: Handling the Optional to resolve the compilation error
+        FacilityScore score = facilityScoreRepository.findByPropertyId(propertyId)
+                .orElseThrow(() -> new RuntimeException("Facility score not found for property: " + propertyId));
 
-        // Compute average finalRating
-        double finalRating = (fs.getSchoolProximity() + fs.getHospitalProximity() + 
-                             fs.getTransportAccess() + fs.getSafetyScore()) / 4.0;
+        // Step 1: Weighted Calculation (30% School, 20% Hospital, 20% Transport, 30% Safety)
+        double finalRating = (score.getSchoolProximity() * 0.3) +
+                             (score.getHospitalProximity() * 0.2) +
+                             (score.getTransportAccess() * 0.2) +
+                             (score.getSafetyScore() * 0.3);
 
+        // Step 2: Determine Category based on thresholds
+        String category;
+        if (finalRating >= 8) category = "EXCELLENT";
+        else if (finalRating >= 6) category = "GOOD";
+        else if (finalRating >= 4) category = "AVERAGE";
+        else category = "POOR";
+
+        // Step 3: Save Rating Result
         RatingResult result = new RatingResult();
         result.setProperty(property);
         result.setFinalRating(finalRating);
+        result.setRatingCategory(category);
         
-        // Category thresholds
-        if (finalRating >= 8.0) result.setRatingCategory("EXCELLENT");
-        else if (finalRating >= 6.0) result.setRatingCategory("GOOD");
-        else if (finalRating >= 4.0) result.setRatingCategory("AVERAGE");
-        else result.setRatingCategory("POOR");
+        RatingResult savedResult = ratingResultRepository.save(result);
 
-        // Requirement: Log each scoring stage
-        logService.addLog(propertyId, "Calculated average: " + finalRating + ". Category assigned: " + result.getRatingCategory());
+        // Step 4: Write to Rating Log
+        RatingLog log = new RatingLog();
+        log.setProperty(property);
+        log.setMessage("System generated rating: " + category + " with score: " + finalRating);
+        ratingLogRepository.save(log);
 
-        return ratingResultRepository.save(result);
+        return savedResult;
     }
 
     @Override
-    public RatingResult getRating(Long propertyId) {
-        return ratingResultRepository.findByPropertyId(propertyId);
+    public List<RatingResult> getAllRatings() {
+        return ratingResultRepository.findAll();
+    }
+
+    @Override
+    public RatingResult getRatingByProperty(Long propertyId) {
+        return ratingResultRepository.findByPropertyId(propertyId)
+                .orElseThrow(() -> new RuntimeException("Rating result not found"));
     }
 }
