@@ -81,22 +81,19 @@ public class RatingServiceImpl implements RatingService {
     @Override
     @Transactional
     public RatingResult generateRating(Long propertyId) {
-        // Step 1: Find property
         Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new RuntimeException("Property not found"));
 
-        // Step 2: Get facility scores
         FacilityScore scores = facilityScoreRepository.findByProperty(property)
                 .orElseThrow(() -> new RuntimeException("Facility scores not found"));
 
-        // Step 3: Weighted Calculation (Logic Requirement)
-        // School (0.3), Hospital (0.2), Transport (0.2), Safety (0.3)
-        double finalRating = (scores.getSchoolScore() * 0.3) +
-                             (scores.getHospitalScore() * 0.2) +
-                             (scores.getTransportScore() * 0.2) +
+        // Using your specific entity field names:
+        // schoolProximity, hospitalProximity, transportAccess, safetyScore
+        double finalRating = (scores.getSchoolProximity() * 0.3) +
+                             (scores.getHospitalProximity() * 0.2) +
+                             (scores.getTransportAccess() * 0.2) +
                              (scores.getSafetyScore() * 0.3);
 
-        // Step 4: Update existing or create new result
         RatingResult result = ratingResultRepository.findByProperty(property)
                 .orElse(new RatingResult());
         
@@ -113,14 +110,12 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public RatingResult getRating(Long propertyId) {
-        // Required by Step 4.4 signature
         return ratingResultRepository.findByPropertyId(propertyId)
                 .orElseThrow(() -> new RuntimeException("Rating not found"));
     }
 
     @Override
     public RatingResult getRatingByProperty(Long propertyId) {
-        // Resolves 'cannot find symbol' in Controller
         return getRating(propertyId);
     }
 }
