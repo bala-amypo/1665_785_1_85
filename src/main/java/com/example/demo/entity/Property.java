@@ -43,8 +43,7 @@ public class Property {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String title; // Required for setTitle()
+    private String title; 
     private String address;
     private String city;
     private Double price;
@@ -54,7 +53,7 @@ public class Property {
     @JoinColumn(name = "user_id")
     private User owner;
 
-    // Required by tests to track assignments
+    // Required for Step 4.2 and Integration Tests
     public void setTitle(String title) {
         this.title = title;
     }
