@@ -26,18 +26,19 @@
 //         return facilityScoreService.getScoreByProperty(propertyId);
 //     }
 // }
+
+
 package com.example.demo.controller;
 
 import com.example.demo.entity.FacilityScore;
 import com.example.demo.service.FacilityScoreService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/scores")
-@Tag(name = "Facility Score Controller")
+@RequestMapping("/api/facility-scores")
 public class FacilityScoreController {
+
     private final FacilityScoreService facilityScoreService;
 
     public FacilityScoreController(FacilityScoreService facilityScoreService) {
@@ -45,14 +46,13 @@ public class FacilityScoreController {
     }
 
     @PostMapping("/{propertyId}")
-    @Operation(summary = "Submit facility score for a property")
-    public FacilityScore submitScore(@PathVariable Long propertyId, @RequestBody FacilityScore score) {
-        return facilityScoreService.addScore(propertyId, score);
+    public ResponseEntity<FacilityScore> addScore(@PathVariable Long propertyId, 
+                                                 @RequestBody FacilityScore score) {
+        return ResponseEntity.ok(facilityScoreService.addScore(propertyId, score));
     }
 
-    @GetMapping("/{propertyId}")
-    @Operation(summary = "Fetch score for a property")
-    public FacilityScore getScore(@PathVariable Long propertyId) {
-        return facilityScoreService.getScoreByProperty(propertyId);
+    @GetMapping("/property/{propertyId}")
+    public ResponseEntity<FacilityScore> getScore(@PathVariable Long propertyId) {
+        return ResponseEntity.ok(facilityScoreService.getScoreByProperty(propertyId));
     }
 }

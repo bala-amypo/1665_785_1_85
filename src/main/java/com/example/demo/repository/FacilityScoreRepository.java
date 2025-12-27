@@ -11,12 +11,14 @@
 package com.example.demo.repository;
 
 import com.example.demo.entity.FacilityScore;
-import com.example.demo.entity.Property; // Mandatory Import
+import com.example.demo.entity.Property;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface FacilityScoreRepository extends JpaRepository<FacilityScore, Long> {
-    // Both are required by different integration tests
+    // Required to fix "cannot find symbol findByProperty" in Integration Tests
     Optional<FacilityScore> findByProperty(Property property);
+    
+    // Used by the Service layer to fetch scores by ID
     Optional<FacilityScore> findByPropertyId(Long propertyId);
 }
