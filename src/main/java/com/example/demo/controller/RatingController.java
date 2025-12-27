@@ -25,3 +25,47 @@
 //     }
 // }
 
+package com.example.demo.controller;
+
+import com.example.demo.entity.RatingResult;
+import com.example.demo.service.RatingService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/ratings")
+@Tag(name = "Rating Controller", description = "Endpoints for generating and viewing property ratings")
+public class RatingController {
+
+    private final RatingService ratingService;
+
+    // Requirement: Constructor Injection for better testability
+    public RatingController(RatingService ratingService) {
+        this.ratingService = ratingService;
+    }
+
+    @PostMapping("/{propertyId}/generate")
+    @Operation(summary = "Generate a rating for a property based on facility scores")
+    public ResponseEntity<RatingResult> generateRating(@PathVariable Long propertyId) {
+        // Calls the core rating logic
+        return ResponseEntity.ok(ratingService.generateRating(propertyId));
+    }
+
+    @GetMapping
+    @Operation(summary = "Get all generated ratings")
+    public ResponseEntity<List<RatingResult>> getAllRatings() {
+        // Resolves the 'cannot find symbol getAllRatings()' error
+        return ResponseEntity.ok(ratingService.getAllRatings());
+    }
+
+    @GetMapping("/property/{propertyId}")
+    @Operation(summary = "Get the specific rating result for a property")
+    public ResponseEntity<RatingResult> getRatingByProperty(@PathVariable Long propertyId) {
+        // Resolves the 'cannot find symbol getRatingByProperty()' error
+        return ResponseEntity.ok(ratingService.getRatingByProperty(propertyId));
+    }
+}
