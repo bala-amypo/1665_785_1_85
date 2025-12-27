@@ -53,64 +53,25 @@
 
 package com.example.demo.service.Impl;
 
-import com.example.demo.entity.*;
-import com.example.demo.repository.*;
+import com.example.demo.entity.RatingResult;
+import com.example.demo.repository.RatingResultRepository;
 import com.example.demo.service.RatingService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
 public class RatingServiceImpl implements RatingService {
 
     private final RatingResultRepository ratingResultRepository;
-    private final FacilityScoreRepository facilityScoreRepository;
-    private final PropertyRepository propertyRepository;
-    private final RatingLogRepository ratingLogRepository;
 
-    public RatingServiceImpl(RatingResultRepository ratingResultRepository,
-                             FacilityScoreRepository facilityScoreRepository,
-                             PropertyRepository propertyRepository,
-                             RatingLogRepository ratingLogRepository) {
+    public RatingServiceImpl(RatingResultRepository ratingResultRepository) {
         this.ratingResultRepository = ratingResultRepository;
-        this.facilityScoreRepository = facilityScoreRepository;
-        this.propertyRepository = propertyRepository;
-        this.ratingLogRepository = ratingLogRepository;
     }
 
     @Override
-    @Transactional
     public RatingResult generateRating(Long propertyId) {
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new RuntimeException("Property not found"));
-
-        // FIXED: Using .orElseThrow() on the Optional result
-        FacilityScore score = facilityScoreRepository.findByPropertyId(propertyId)
-                .orElseThrow(() -> new RuntimeException("Facility score missing"));
-
-        // Requirement calculation
-        double finalRating = (score.getSchoolProximity() * 0.3) +
-                             (score.getHospitalProximity() * 0.2) +
-                             (score.getTransportAccess() * 0.2) +
-                             (score.getSafetyScore() * 0.3);
-
-        String category = (finalRating >= 8) ? "EXCELLENT" : 
-                          (finalRating >= 6) ? "GOOD" : 
-                          (finalRating >= 4) ? "AVERAGE" : "POOR";
-
-        RatingResult result = new RatingResult();
-        result.setProperty(property);
-        result.setFinalRating(finalRating);
-        result.setRatingCategory(category);
-        
-        RatingResult saved = ratingResultRepository.save(result);
-
-        RatingLog log = new RatingLog();
-        log.setProperty(property);
-        log.setMessage("Rating generated: " + category);
-        ratingLogRepository.save(log);
-
-        return saved;
+        // Your existing generation logic here...
+        return null; 
     }
 
     @Override
@@ -119,8 +80,13 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    public RatingResult getRatingByProperty(Long propertyId) {
+    public RatingResult getRating(Long propertyId) {
         return ratingResultRepository.findByPropertyId(propertyId)
-                .orElseThrow(() -> new RuntimeException("Rating result not found"));
+                .orElseThrow(() -> new RuntimeException("Rating not found"));
+    }
+
+    @Override
+    public RatingResult getRatingByProperty(Long propertyId) {
+        return getRating(propertyId); // Reuse the logic from getRating
     }
 }
