@@ -14,7 +14,6 @@ package com.example.demo.service;
 import com.example.demo.entity.RatingResult;
 
 public interface RatingService {
-    // Corrected interface name to match filename
-    RatingResult generateRating(Long propertyId); 
-    RatingResult getRating(Long propertyId); // Required by integration tests
+    RatingResult generateRating(Long propertyId);
+    RatingResult getRating(Long propertyId); // Use 'getRating', not 'getRatingByProperty'
 }

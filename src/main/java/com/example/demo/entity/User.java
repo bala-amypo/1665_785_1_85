@@ -35,9 +35,13 @@ public class User {
     private String name;
     private String email;
     private String password;
-    private String role; // ADMIN or ANALYST
+    private String role;
 
-    // Tests look for this specific method name
     @OneToMany(mappedBy = "owner")
     private List<Property> assignedProperties;
+
+    // Explicitly define this for the integration tests
+    public List<Property> getAssignedProperties() {
+        return assignedProperties;
+    }
 }
