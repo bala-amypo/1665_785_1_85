@@ -16,7 +16,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface RatingLogRepository extends JpaRepository<RatingLog, Long> {
-    // Used to list all logs for a specific property
-    List<RatingLog> findByPropertyId(Long propertyId);
+    java.util.List<RatingLog> findByProperty(Property property); // Required
+    
+    // Some tests use a custom save name
+    default void addRatingLog(RatingLog log) {
+        save(log);
+    }
 }
-

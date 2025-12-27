@@ -42,16 +42,18 @@ public class Property {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private String title; // Required for p.setTitle() calls
     private String address;
     private String city;
-    
-    @Min(value = 1, message = "Price must be greater than 0")
+
+    @Min(1)
     private Double price;
-    
-    @Min(value = 100, message = "Area must be at least 100 sq ft")
+
+    @Min(100)
     private Double areaSqFt;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User owner;
+    private User owner; // Required for assignedProperties logic
 }

@@ -11,6 +11,7 @@ import java.util.Map;
 public class JwtTokenProvider {
     private final String SECRET = "RealEstateSecretKeyForJWTAuthentication1234567890";
 
+    // Strictly matches the (Long, String, String) signature required by tests
     public String generateToken(Long userId, String email, String role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
@@ -26,25 +27,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // FIX: Method required by JwtAuthenticationFilter
-    public String getEmailFromToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET)
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
-
-    // FIX: Method required by JwtAuthenticationFilter
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
+    // Required for token-based identity verification in tests
     public Long getUserIdFromToken(String token) {
         return Jwts.parser()
                 .setSigningKey(SECRET)

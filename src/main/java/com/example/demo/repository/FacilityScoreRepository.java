@@ -17,6 +17,6 @@ import java.util.Optional;
 
 @Repository
 public interface FacilityScoreRepository extends JpaRepository<FacilityScore, Long> {
-    // This must return Optional so that the Service can use .orElseThrow()
-    Optional<FacilityScore> findByPropertyId(Long propertyId);
+    java.util.Optional<FacilityScore> findByProperty(Property property); // Required
+    java.util.Optional<FacilityScore> findByPropertyId(Long propertyId);
 }

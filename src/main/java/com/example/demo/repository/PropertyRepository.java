@@ -22,6 +22,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface PropertyRepository extends JpaRepository<Property, Long> {
+    
+    // Required for the property search tests
+    List<Property> findByCity(String city);
+
     // Step 0 HQL requirement
     @Query("SELECT p FROM Property p WHERE p.city = :city")
     List<Property> findByCityHql(@Param("city") String city);
