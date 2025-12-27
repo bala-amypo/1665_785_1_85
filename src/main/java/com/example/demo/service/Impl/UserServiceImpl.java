@@ -40,7 +40,6 @@ import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.Optional;
 
 @Service
@@ -49,7 +48,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // Requirement: Constructor Injection
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -57,17 +55,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User register(User user) {
-        // Requirement: Check for unique email
+        // Requirement: Check if email already exists
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new RuntimeException("Email already in use");
         }
 
-        // Requirement: Default role to ANALYST if null or empty
+        // Requirement: Default role must be "ANALYST" if not provided
         if (user.getRole() == null || user.getRole().trim().isEmpty()) {
             user.setRole("ANALYST");
         }
 
-        // BCrypt hashing requirement
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }

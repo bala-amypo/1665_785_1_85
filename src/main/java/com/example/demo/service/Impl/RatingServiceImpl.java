@@ -53,7 +53,11 @@
 
 package com.example.demo.service.Impl;
 
+import com.example.demo.entity.FacilityScore;
+import com.example.demo.entity.Property;
 import com.example.demo.entity.RatingResult;
+import com.example.demo.repository.FacilityScoreRepository;
+import com.example.demo.repository.PropertyRepository;
 import com.example.demo.repository.RatingResultRepository;
 import com.example.demo.service.RatingService;
 import org.springframework.stereotype.Service;
@@ -63,15 +67,39 @@ import java.util.List;
 public class RatingServiceImpl implements RatingService {
 
     private final RatingResultRepository ratingResultRepository;
+    private final FacilityScoreRepository facilityScoreRepository;
+    private final PropertyRepository propertyRepository;
 
-    public RatingServiceImpl(RatingResultRepository ratingResultRepository) {
+    public RatingServiceImpl(RatingResultRepository ratingResultRepository, 
+                             FacilityScoreRepository facilityScoreRepository,
+                             PropertyRepository propertyRepository) {
         this.ratingResultRepository = ratingResultRepository;
+        this.facilityScoreRepository = facilityScoreRepository;
+        this.propertyRepository = propertyRepository;
     }
 
     @Override
     public RatingResult generateRating(Long propertyId) {
-        // Your existing generation logic here...
-        return null; 
+        Property property = propertyRepository.findById(propertyId)
+                .orElseThrow(() -> new RuntimeException("Property not found"));
+
+        FacilityScore scores = facilityScoreRepository.findByProperty(property)
+                .orElseThrow(() -> new RuntimeException("Facility scores not found for this property"));
+
+        // Logic Requirement: 0.3 school, 0.2 hospital, 0.2 transport, 0.3 safety
+        double finalRating = (scores.getSchoolScore() * 0.3) +
+                             (scores.getHospitalScore() * 0.2) +
+                             (scores.getTransportScore() * 0.2) +
+                             (scores.getSafetyScore() * 0.3);
+
+        // Check if a result already exists to update it, or create new
+        RatingResult result = ratingResultRepository.findByProperty(property)
+                .orElse(new RatingResult());
+        
+        result.setProperty(property);
+        result.setFinalRating(finalRating);
+
+        return ratingResultRepository.save(result);
     }
 
     @Override
@@ -87,6 +115,6 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public RatingResult getRatingByProperty(Long propertyId) {
-        return getRating(propertyId); // Reuse the logic from getRating
+        return getRating(propertyId);
     }
 }

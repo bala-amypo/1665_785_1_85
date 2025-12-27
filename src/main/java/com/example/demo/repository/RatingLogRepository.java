@@ -19,16 +19,9 @@ import java.util.List;
 
 @Repository
 public interface RatingLogRepository extends JpaRepository<RatingLog, Long> {
-
-    /**
-     * Finds audit logs by the Property entity. 
-     * Required for integration tests to verify property-specific history.
-     */
+    // Required to fix "cannot find symbol findByProperty"
     List<RatingLog> findByProperty(Property property);
-
-    /**
-     * Finds audit logs by Property ID. 
-     * Used by the service layer to retrieve logs.
-     */
+    
+    // Required for Step 4.5
     List<RatingLog> findByPropertyId(Long propertyId);
 }
