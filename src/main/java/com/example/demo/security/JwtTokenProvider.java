@@ -1,5 +1,6 @@
 package com.example.demo.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Component;
@@ -9,30 +10,59 @@ import java.util.Map;
 
 @Component
 public class JwtTokenProvider {
-    private final String SECRET = "RealEstateSecretKeyForJWTAuthentication1234567890";
 
-    // Strictly matches the (Long, String, String) signature required by tests
+    // Requirement: Strong secret key for HS512 algorithm
+    private final String SECRET = "RealEstateSecretKeyForJWTAuthentication123456789012345678901234567890";
+    private final long EXPIRATION_TIME = 86400000; // 24 hours
+
+    /**
+     * Requirement: Tests call this specific signature (Long, String, String)
+     */
     public String generateToken(Long userId, String email, String role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
-        claims.put("email", email);
         claims.put("role", role);
 
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS512, SECRET)
                 .compact();
     }
 
-    // Required for token-based identity verification in tests
+    /**
+     * Requirement: Tests explicitly call this to verify identity
+     */
     public Long getUserIdFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(SECRET)
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.get("userId", Long.class);
+    }
+
+    /**
+     * Used by JwtAuthenticationFilter to extract the username (email)
+     */
+    public String getEmailFromToken(String token) {
         return Jwts.parser()
                 .setSigningKey(SECRET)
                 .parseClaimsJws(token)
                 .getBody()
-                .get("userId", Long.class);
+                .getSubject();
+    }
+
+    /**
+     * Requirement: Validation method for the security filter
+     */
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

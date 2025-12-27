@@ -17,7 +17,6 @@ import java.util.List;
 
 public interface RatingService {
     RatingResult generateRating(Long propertyId);
-    List<RatingResult> getAllRatings();
-    // Use this exact name to match the implementation we are about to fix
-    RatingResult getRatingByProperty(Long propertyId); 
+    // Note: The image says getRating, not getRatingByProperty
+    RatingResult getRating(Long propertyId); 
 }
