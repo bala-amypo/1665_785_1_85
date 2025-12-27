@@ -36,46 +36,34 @@ import com.example.demo.entity.Property;
 import com.example.demo.repository.FacilityScoreRepository;
 import com.example.demo.repository.PropertyRepository;
 import com.example.demo.service.FacilityScoreService;
-import com.example.demo.service.RatingService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class FacilityScoreServiceImpl implements FacilityScoreService {
 
     private final FacilityScoreRepository facilityScoreRepository;
     private final PropertyRepository propertyRepository;
-    private final RatingService ratingService;
 
     public FacilityScoreServiceImpl(FacilityScoreRepository facilityScoreRepository, 
-                                     PropertyRepository propertyRepository,
-                                     RatingService ratingService) {
+                                    PropertyRepository propertyRepository) {
         this.facilityScoreRepository = facilityScoreRepository;
         this.propertyRepository = propertyRepository;
-        this.ratingService = ratingService;
     }
 
     @Override
-    @Transactional
     public FacilityScore addScore(Long propertyId, FacilityScore score) {
         Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new RuntimeException("Property not found"));
-
-        // Score validation (0-10)
-        if (score.getSchoolProximity() < 0 || score.getSchoolProximity() > 10) 
-            throw new RuntimeException("Scores must be between 0 and 10");
-
-        score.setProperty(property);
-        FacilityScore saved = facilityScoreRepository.save(score);
         
-        // Trigger rating automatically
-        ratingService.generateRating(propertyId);
-        return saved;
+        // Link the score to the property before saving
+        score.setProperty(property);
+        return facilityScoreRepository.save(score);
     }
 
     @Override
     public FacilityScore getScoreByProperty(Long propertyId) {
+        // Requirement: Retrieves specific scores for the rating calculation
         return facilityScoreRepository.findByPropertyId(propertyId)
-                .orElseThrow(() -> new RuntimeException("Facility score not found"));
+                .orElseThrow(() -> new RuntimeException("Facility scores not found"));
     }
 }
