@@ -8,18 +8,16 @@
 // }
 
 
-
 package com.example.demo.repository;
 
 import com.example.demo.entity.RatingLog;
+import com.example.demo.entity.Property; // ADD THIS IMPORT
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import java.util.List;
 
+@Repository
 public interface RatingLogRepository extends JpaRepository<RatingLog, Long> {
-    java.util.List<RatingLog> findByProperty(Property property); // Required
-    
-    // Some tests use a custom save name
-    default void addRatingLog(RatingLog log) {
-        save(log);
-    }
+    // This method is required by the integration tests
+    List<RatingLog> findByProperty(Property property);
 }
