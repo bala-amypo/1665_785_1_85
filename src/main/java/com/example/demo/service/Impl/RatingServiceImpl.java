@@ -50,7 +50,6 @@
 //     }
 // }
 
-
 package com.example.demo.service.Impl;
 
 import com.example.demo.entity.FacilityScore;
@@ -61,6 +60,7 @@ import com.example.demo.repository.PropertyRepository;
 import com.example.demo.repository.RatingResultRepository;
 import com.example.demo.service.RatingService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
@@ -79,20 +79,24 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
+    @Transactional
     public RatingResult generateRating(Long propertyId) {
+        // Step 1: Find property
         Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new RuntimeException("Property not found"));
 
+        // Step 2: Get facility scores
         FacilityScore scores = facilityScoreRepository.findByProperty(property)
-                .orElseThrow(() -> new RuntimeException("Facility scores not found for this property"));
+                .orElseThrow(() -> new RuntimeException("Facility scores not found"));
 
-        // Logic Requirement: 0.3 school, 0.2 hospital, 0.2 transport, 0.3 safety
+        // Step 3: Weighted Calculation (Logic Requirement)
+        // School (0.3), Hospital (0.2), Transport (0.2), Safety (0.3)
         double finalRating = (scores.getSchoolScore() * 0.3) +
                              (scores.getHospitalScore() * 0.2) +
                              (scores.getTransportScore() * 0.2) +
                              (scores.getSafetyScore() * 0.3);
 
-        // Check if a result already exists to update it, or create new
+        // Step 4: Update existing or create new result
         RatingResult result = ratingResultRepository.findByProperty(property)
                 .orElse(new RatingResult());
         
@@ -109,12 +113,14 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public RatingResult getRating(Long propertyId) {
+        // Required by Step 4.4 signature
         return ratingResultRepository.findByPropertyId(propertyId)
                 .orElseThrow(() -> new RuntimeException("Rating not found"));
     }
 
     @Override
     public RatingResult getRatingByProperty(Long propertyId) {
+        // Resolves 'cannot find symbol' in Controller
         return getRating(propertyId);
     }
 }
