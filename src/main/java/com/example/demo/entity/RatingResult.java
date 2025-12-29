@@ -1,55 +1,74 @@
-// package com.example.demo.entity;
-// import jakarta.persistence.*;
-// import lombok.*;
-// import java.time.LocalDateTime;
-
-// @Entity
-// @Data
-// @NoArgsConstructor
-// @AllArgsConstructor
-// public class RatingResult {
-
-//     @Id
-//     @GeneratedValue(strategy = GenerationType.IDENTITY)
-//     private Long id;
-
-//     @OneToOne
-//     private Property property;
-
-//     private Double finalRating;
-//     private String ratingCategory;
-//     private LocalDateTime ratedAt;
-
-//     @PrePersist
-//     public void onCreate() {
-//         ratedAt = LocalDateTime.now();
-//     }
-// }
-
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
-@Data
+@Table(name = "rating_results")
 public class RatingResult {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "property_id")
-    private Property property; //
+    @JoinColumn(name = "property_id", nullable = false, unique = true)
+    @JsonIgnore
+    private Property property;
 
     private Double finalRating;
-    private String ratingCategory; // POOR, AVERAGE, GOOD, EXCELLENT
+
+    private String ratingCategory;
 
     private LocalDateTime ratedAt;
 
+    public RatingResult() {
+    }
+
+    public RatingResult(Property property, Double finalRating,
+                        String ratingCategory, LocalDateTime ratedAt) {
+        this.property = property;
+        this.finalRating = finalRating;
+        this.ratingCategory = ratingCategory;
+        this.ratedAt = ratedAt;
+    }
+
     @PrePersist
-    protected void onCreate() {
-        this.ratedAt = LocalDateTime.now(); // Auto-generated
+    public void onCreate() {
+        this.ratedAt = LocalDateTime.now();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Property getProperty() {
+        return property;
+    }
+
+    public void setProperty(Property property) {
+        this.property = property;
+    }
+
+    public Double getFinalRating() {
+        return finalRating;
+    }
+
+    public void setFinalRating(Double finalRating) {
+        this.finalRating = finalRating;
+    }
+
+    public String getRatingCategory() {
+        return ratingCategory;
+    }
+
+    public void setRatingCategory(String ratingCategory) {
+        this.ratingCategory = ratingCategory;
+    }
+
+    public LocalDateTime getRatedAt() {
+        return ratedAt;
     }
 }
