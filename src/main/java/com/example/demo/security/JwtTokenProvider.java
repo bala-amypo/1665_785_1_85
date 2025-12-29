@@ -1,68 +1,70 @@
 package com.example.demo.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.example.demo.entity.User;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+
+import java.security.Key;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class JwtTokenProvider {
 
-    // Requirement: Strong secret key for HS512 algorithm
-    private final String SECRET = "RealEstateSecretKeyForJWTAuthentication123456789012345678901234567890";
-    private final long EXPIRATION_TIME = 86400000; // 24 hours
+    @Value("${jwt.secret:ThisIsASecretKeyForJwtToken123456789}")
+    private String jwtSecret;
 
-    /**
-     * Requirement: Tests call this specific signature (Long, String, String)
-     */
-    public String generateToken(Long userId, String email, String role) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userId);
-        claims.put("role", role);
+    @Value("${jwt.expiration:86400000}")
+    private long jwtExpiration;
+
+    private Key getKey() {
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+    }
+
+    public String generateToken(Authentication authentication, User user) {
+
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + jwtExpiration);
 
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(email)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS512, SECRET)
+                .setSubject(authentication.getName())
+                .claim("userId", user.getId())
+                .claim("role", user.getRole())
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    /**
-     * Requirement: Tests explicitly call this to verify identity
-     */
-    public Long getUserIdFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(SECRET)
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.get("userId", Long.class);
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(getKey())
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (JwtException e) {
+            return false;
+        }
     }
 
-    /**
-     * Used by JwtAuthenticationFilter to extract the username (email)
-     */
     public String getEmailFromToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET)
+        return Jwts.parserBuilder()
+                .setSigningKey(getKey())
+                .build()
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
     }
-
-    /**
-     * Requirement: Validation method for the security filter
-     */
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    
+    public Long getUserIdFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("userId", Long.class);
     }
 }
